@@ -1,4 +1,8 @@
 langchain
 ctransformers
 sentence-transformers
+transformers
 faiss-cpu
+langchain-experimental
+langchain-community
+torch==2.2.0
