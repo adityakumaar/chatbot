@@ -7,9 +7,9 @@ from langchain.document_loaders.csv_loader import CSVLoader
 #from langchain_text_splitters import CharacterTextSplitter
 from langchain_experimental.text_splitter import SemanticChunker
 #from langchain_core.prompts import ChatPromptTemplate
-from langchain.embeddings import HuggingFaceEmbeddings
+from langchain.embeddings import HuggingFaceEmbeddings, HuggingFaceInstructEmbeddings
 from langchain.vectorstores import FAISS
-from langchain.llms import CTransformers
+from langchain.llms import CTransformers, HuggingFaceHub
 from langchain.chains import ConversationalRetrievalChain, LLMChain
 
 #from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
@@ -19,7 +19,7 @@ from langchain_core.prompts import PromptTemplate
 # below 3 libraries are for loading remote models
 #from transformers import LlamaForCausalLM
 #from sentence_transformers import SentenceTransformer
-from transformers import AutoModelForCausalLM
+#from transformers import AutoModelForCausalLM
 import torch
 
 
@@ -72,6 +72,7 @@ def main():
 
         # loading remote embedding model
         embeddings = HuggingFaceEmbeddings(model_name='sentence-transformers/all-MiniLM-L6-v2')
+        #embeddings = HuggingFaceInstructEmbeddings(model_name='sentence-transformers/all-MiniLM-L6-v2')
         
         # creating chunks from CSV file
         #text_splitter = RecursiveCharacterTextSplitter(chunk_size=800, chunk_overlap=50)
@@ -93,14 +94,35 @@ def main():
         #llm = LlamaForCausalLM.from_pretrained("meta-llama/Llama-2-7b-hf")
         #llm = AutoModelForCausalLM.from_pretrained("google/gemma-1.1-2b-it")
 
-        token = os.environ["HF_TOKEN"]
-        llm = AutoModelForCausalLM.from_pretrained(
-        "google/gemma-7b-it",
+        # loading hf token
+        #token = os.environ["HF_TOKEN"]
+        
+        # loading gemma model
+        #llm = AutoModelForCausalLM.from_pretrained(
+        #"google/gemma-7b-it",
         # torch_dtype=torch.float16 if torch.cuda.is_available() else torch.float32,
-        torch_dtype=torch.float16,
-        token=token,
-        )
+        #torch_dtype=torch.float16,
+        #token=token,
+        #)
 
+        llm = CTransformers(model="TheBloke/Llama-2-7B-Chat-GGML",
+                            model_file="llama-2-7b-chat.ggmlv3.q4_0.bin",
+                            model_type="llama",
+                            max_new_tokens=512,
+                            temperature=0.1)
+        
+        # loading zephyr model
+        #llm = HuggingFaceHub( 
+        # repo_id="google/flan-ul2",
+        #repo_id="HuggingFaceH4/zephyr-7b-beta", 
+        #                 model_kwargs={"temperature":0.1, 
+        #                               "max_length":2048, 
+        #                                "top_k":50,
+        #                                "task":"text-generation",
+        #                                "num_return_sequences":3,
+        #                                "top_p":0.95
+        #                              }
+        #                    )
         
         # custom prompt
         custom_template="""
